@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register | Unisphere</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .form-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            width: 350px;
+            margin-top: 30rem;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #5a67d8;
+            color: white;
+            border: none;
+            margin-top: 15px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .errorlist {
+            color: red;
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 10px;
+        }
+        .message {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-box">
+        <h2>Register to Unisphere</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="{% url 'login' %}">Login here</a>.</p>
+    </div>
+</body>
+</html>

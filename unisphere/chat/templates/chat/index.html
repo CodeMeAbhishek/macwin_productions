@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unisphere Home</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+        }
+        header {
+            background: #2b6cb0;
+            padding: 1rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-links a {
+            margin-left: 15px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            padding: 2rem;
+        }
+        form {
+            margin-bottom: 1rem;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 60%;
+            max-width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-left: 10px;
+            background: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .user-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
+        }
+        .user-card a {
+            font-weight: bold;
+            text-decoration: none;
+            color: #2b6cb0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <strong>Unisphere</strong>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'friends' %}">Friends List</a>
+            <a href="#">Chat</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Welcome, {{ request.user.username }}!</h2>
+
+        <form method="get">
+            <input type="text" name="q" placeholder="Search users by name or username..." value="{{ request.GET.q }}">
+            <button type="submit">Search</button>
+        </form>
+
+        {% if results %}
+            <div class="results">
+                <h3>Search Results:</h3>
+                {% for user in results %}
+                    <div class="user-card">
+                        <a href="{% url 'user_profile' user.id %}">
+                            {{ user.username }} — {{ user.profile.full_name }}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% elif request.GET.q %}
+            <p>No users found for "{{ request.GET.q }}"</p>
+        {% endif %}
+    </div>
+</body>
+</html>

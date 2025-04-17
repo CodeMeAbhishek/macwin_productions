@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ other_user.username }}'s Profile | Unisphere</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #f7fafc;
+        padding: 2rem;
+      }
+      .profile-card {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+      .profile-pic {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+      }
+      h2 {
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: #555;
+        margin: 5px 0;
+      }
+      a {
+        display: inline-block;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #4299e1;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="profile-card">
+      {% if other_user.profile.profile_pic %}
+      <img
+        src="{{ other_user.profile.profile_pic.url }}"
+        alt="Profile Picture"
+        class="profile-pic"
+      />
+      {% endif %}
+
+      <h2>{{ other_user.profile.full_name }}</h2>
+      <p><strong>Username:</strong> {{ other_user.username }}</p>
+      <p><strong>Branch:</strong> {{ other_user.profile.branch }}</p>
+      <p><strong>Year:</strong> {{ other_user.profile.year }}</p>
+      <p>
+        <strong>Relationship Status:</strong>
+        {% for val, label in other_user.profile.RELATIONSHIP_CHOICES %}
+          {% if other_user.profile.relationship_status == val %}
+            {{ label }}
+          {% endif %}
+        {% endfor %}
+      </p>
+      <p>{{ other_user.profile.bio }}</p>
+
+      {% if is_friend %}
+      <p>✅ You and {{ other_user.username }} are friends.</p>
+      {% elif friend_request_sent %}
+      <p>📨 Friend request sent!</p>
+      {% elif friend_request_received %}
+      <p>Friend request received!</p>
+      <form method="post" action="{% url 'user_profile' other_user.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="accept_request">
+        <button type="submit">Accept Friend Request</button>
+      </form>
+      {% else %}
+      <form method="post" action="{% url 'send_request' other_user.id %}">
+        {% csrf_token %}
+        <button type="submit">Send Friend Request</button>
+      </form>
+      {% endif %}
+
+      <a href="{% url 'index' %}">← Back to Home</a>
+    </div>
+  </body>
+</html>
