@@ -59,8 +59,19 @@
     {% if friends %}
       {% for friend in friends %}
         <div class="friend-card">
-          <a href="{% url 'chat_with_friend' friend.id %}">
-            {{ friend.username }}
+          <a href="{% url 'chat_with_friend' friend.user.id %}">
+            {{ friend.user.username }}
+            
+            {% if friend.unread > 0 %}
+              <span style="color: red;">({{ friend.unread }} new)</span>
+            {% endif %}
+
+            {% if friend.last_message %}
+              <div style="font-size: 0.9em; color: #666;">
+                {{ friend.last_message.sender.username }}: 
+                {{ friend.last_message.content|truncatechars:30 }}
+              </div>
+            {% endif %}
           </a>
         </div>
       {% endfor %}

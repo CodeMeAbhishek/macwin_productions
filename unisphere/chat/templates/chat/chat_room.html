@@ -1,11 +1,190 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Chat with {{ friend.username }} | Unisphere</title>
+  <meta charset="UTF-8">
+  <title>Chat with {{ friend.username }} | Unisphere</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f7fafc;
+      margin: 0;
+      padding: 2rem;
+    }
+    .chat-box {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      height: 80vh;
+    }
+    .chat-header {
+      font-weight: bold;
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .messages {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    .message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      max-width: 75%;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .from-me {
+      background: #bee3f8;
+      align-self: flex-end;
+      margin-left: auto;
+      flex-direction: row-reverse;
+    }
+    .from-them {
+      background: #edf2f7;
+      align-self: flex-start;
+    }
+    .message-content {
+      display: flex;
+      flex-direction: column;
+    }
+    .from-me .message-content {
+      align-items: flex-end;
+      text-align: right;
+    }
+    .from-them .message-content {
+      align-items: flex-start;
+      text-align: left;
+    }
+    .chat-input {
+      margin-top: auto;
+      display: flex;
+      gap: 10px;
+      padding-top: 1rem;
+      border-top: 1px solid #edf2f7;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .chat-input button {
+      padding: 10px 20px;
+      background: #4299e1;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .chat-input button:hover {
+      background: #3182ce;
+    }
+    .back-link {
+      color: #4299e1;
+      text-decoration: none;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-    <h2>Chat with {{ friend.username }}</h2>
-    <p>(Chat interface coming soon!)</p>
-    <a href="{% url 'friends' %}">← Back to Friends</a>
+  <div class="chat-box">
+    <div class="chat-header">
+      <span>Chat with {{ friend.username }}</span>
+      <a href="{% url 'friends' %}" class="back-link">← Back to Friends</a>
+    </div>
+
+    <div class="messages" id="chat-log">
+        {% for msg in chat_messages %}
+        <div class="message {% if msg.sender == request.user %}from-me{% else %}from-them{% endif %}">
+            {% if msg.sender == request.user %}
+              <div class="message-content">
+                <p style="margin: 0;">{{ msg.content }}</p>
+                <small>{{ msg.timestamp|date:"H:i" }}{% if msg.sender == request.user and forloop.last and msg.is_read %} ✓ Seen{% endif %}</small>
+              </div>
+              {% if request.user.profile.profile_pic %}
+                <img src="{{ request.user.profile.profile_pic.url }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" alt="Profile">
+              {% else %}
+                <div style="width: 36px; height: 36px; background: #ccc; border-radius: 50%;"></div>
+              {% endif %}
+            {% else %}
+              {% if friend.profile.profile_pic %}
+                <img src="{{ friend.profile.profile_pic.url }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" alt="Profile">
+              {% else %}
+                <div style="width: 36px; height: 36px; background: #ccc; border-radius: 50%;"></div>
+              {% endif %}
+              <div class="message-content">
+                <p style="margin: 0;">{{ msg.content }}</p>
+                <small>{{ msg.timestamp|date:"H:i" }}{% if msg.sender == request.user and forloop.last and msg.is_read %} ✓ Seen{% endif %}</small>
+              </div>
+            {% endif %}
+          </div>
+      {% endfor %}      
+    </div>
+
+    <div class="chat-input">
+      <input type="text" id="chat-message-input" placeholder="Type your message..." />
+      <button id="chat-message-submit">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const roomName = "{{ room_name }}";
+    const senderId = "{{ request.user.id }}";
+    const receiverId = "{{ friend.id }}";
+
+    const chatSocket = new WebSocket(
+      'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message');
+      msgDiv.classList.add(data.sender === "{{ request.user.username }}" ? 'from-me' : 'from-them');
+      msgDiv.innerHTML = `<p>${data.message}</p><small>${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</small>`;
+      document.getElementById('chat-log').appendChild(msgDiv);
+      document.getElementById('chat-log').scrollTop = document.getElementById('chat-log').scrollHeight;
+    };
+
+    chatSocket.onclose = function(e) {
+      console.error('Chat socket closed unexpectedly');
+    };
+
+    document.getElementById('chat-message-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('chat-message-submit').click();
+      }
+    });
+
+    document.getElementById('chat-message-submit').onclick = function() {
+      const inputField = document.getElementById('chat-message-input');
+      const message = inputField.value;
+      if (!message.trim()) return;
+
+      chatSocket.send(JSON.stringify({
+        'message': message,
+        'sender': senderId,
+        'receiver': receiverId
+      }));
+
+      inputField.value = '';
+    };
+
+    // Scroll to bottom on load
+    window.onload = function() {
+      document.getElementById('chat-log').scrollTop = document.getElementById('chat-log').scrollHeight;
+    }
+  </script>
 </body>
 </html>

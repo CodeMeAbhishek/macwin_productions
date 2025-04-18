@@ -5,7 +5,7 @@ class Profile(models.Model):
     RELATIONSHIP_CHOICES = [
         ('S', 'Single'),
         ('R', 'In a Relationship'),
-        ('C', 'It’s complicated'),
+        ('C', "It's complicated"),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -30,3 +30,16 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return f"{self.from_user} → {self.to_user}"
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False) 
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.sender} → {self.receiver}: {self.content[:30]}"

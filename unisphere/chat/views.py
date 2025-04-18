@@ -5,10 +5,11 @@ from .forms import RegisterForm, ProfileForm
 from .models import Profile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .models import FriendRequest
+from .models import FriendRequest, Message
 from django.http import HttpResponse
 from django.urls import reverse
 from django.db.models import Q
+
 @login_required
 def index_view(request):
     query = request.GET.get('q')
@@ -105,7 +106,28 @@ def friends_list_view(request):
     sent = FriendRequest.objects.filter(from_user=request.user, is_accepted=True)
     received = FriendRequest.objects.filter(to_user=request.user, is_accepted=True)
     friends = [fr.to_user for fr in sent] + [fr.from_user for fr in received]
-    return render(request, 'chat/friends.html', {'friends': friends})
+
+    friends_data = []
+    for friend in friends:
+        unread_count = Message.objects.filter(
+            sender=friend,
+            receiver=request.user,
+            is_read=False
+        ).count()
+
+        last_message = Message.objects.filter(
+            Q(sender=request.user, receiver=friend) |
+            Q(sender=friend, receiver=request.user)
+        ).order_by('-timestamp').first()
+
+        friends_data.append({
+            'user': friend,
+            'unread': unread_count,
+            'last_message': last_message
+        })
+
+    return render(request, 'chat/friends.html', {'friends': friends_data})
+
 
 @login_required
 def user_profile_view(request, user_id):
@@ -158,12 +180,10 @@ def user_profile_view(request, user_id):
 def chat_with_friend(request, friend_id):
     friend = User.objects.get(id=friend_id)
 
-    # Make sure they're actually friends
+    # Ensure they're friends
     is_friend = FriendRequest.objects.filter(
-        (
-            Q(from_user=request.user, to_user=friend) |
-            Q(from_user=friend, to_user=request.user)
-        ),
+        Q(from_user=request.user, to_user=friend) |
+        Q(from_user=friend, to_user=request.user),
         is_accepted=True
     ).exists()
 
@@ -171,4 +191,21 @@ def chat_with_friend(request, friend_id):
         messages.error(request, "You are not friends with this user.")
         return redirect('friends')
 
-    return render(request, 'chat/chat_room.html', {'friend': friend})
+    # Get chat history
+    messages_qs = Message.objects.filter(
+        Q(sender=request.user, receiver=friend) |
+        Q(sender=friend, receiver=request.user)
+    )
+
+    # Create a unique room name based on user IDs
+    room_name = f"{min(request.user.id, friend.id)}_{max(request.user.id, friend.id)}"
+
+    # Mark unread messages as read
+    Message.objects.filter(sender=friend, receiver=request.user, is_read=False).update(is_read=True)
+
+
+    return render(request, 'chat/chat_room.html', {
+        'friend': friend,
+        'chat_messages': messages_qs,
+        'room_name': room_name
+    })
