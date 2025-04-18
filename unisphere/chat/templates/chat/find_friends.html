@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Find Friends - MacWin</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Tahoma", "Verdana", sans-serif;
+            background-color: #fff;
+            font-size: 11px;
+        }
+        .header {
+            background-color: #3b5998;
+            padding: 2px 5px;
+            color: white;
+            border-bottom: 1px solid #1d4088;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-right: 15px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 14px;
+            padding: 2px;
+        }
+        .header-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 11px;
+        }
+        .container {
+            width: 800px;
+            margin: 20px auto;
+            display: flex;
+        }
+        .sidebar {
+            width: 200px;
+            margin-right: 20px;
+        }
+        .quick-search {
+            border: 1px solid #b3b3b3;
+            padding: 8px;
+            margin-bottom: 10px;
+            background: #f7f7f7;
+        }
+        .quick-search input {
+            width: 120px;
+            padding: 2px;
+            font-size: 11px;
+            border: 1px solid #bdc7d8;
+        }
+        .quick-search button {
+            padding: 1px 6px;
+            font-size: 11px;
+            background: #3b5998;
+            color: white;
+            border: 1px solid #1d4088;
+            cursor: pointer;
+        }
+        .nav-links {
+            border: 1px solid #b3b3b3;
+            padding: 8px;
+            background: #f7f7f7;
+        }
+        .nav-links a {
+            display: block;
+            color: #3b5998;
+            text-decoration: none;
+            padding: 3px 0;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .main-content {
+            flex: 1;
+        }
+        .search-section {
+            border: 1px solid #b3b3b3;
+            margin-bottom: 20px;
+        }
+        .section-header {
+            background: #3b5998;
+            color: white;
+            padding: 4px 8px;
+            font-weight: bold;
+        }
+        .section-content {
+            padding: 10px;
+            background: white;
+        }
+        .search-box {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 5px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 4px 8px;
+            font-size: 11px;
+            border: 1px solid #bdc7d8;
+        }
+        .search-box button {
+            padding: 4px 12px;
+            font-size: 11px;
+            background: #3b5998;
+            color: white;
+            border: 1px solid #1d4088;
+            cursor: pointer;
+        }
+        .search-box button:hover {
+            background: #2f477a;
+        }
+        .user-card {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .profile-pic {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .user-details h3 {
+            margin: 0;
+            font-size: 13px;
+            color: #1877f2;
+        }
+        .user-details p {
+            margin: 2px 0;
+            color: #65676b;
+            font-size: 11px;
+        }
+        .action-btn {
+            padding: 4px 12px;
+            font-size: 11px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .add-btn {
+            background: #42b72a;
+            border: none;
+            color: white;
+        }
+        .add-btn:hover {
+            background: #36a420;
+        }
+        .pending-btn {
+            background: #e4e6eb;
+            border: 1px solid #bec3c9;
+            color: #4b4f56;
+            cursor: default;
+        }
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #65676b;
+            font-style: italic;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>[ macwin ]</h1>
+        <div class="header-links">
+            <a href="{% url 'index' %}">home</a>
+            <a href="{% url 'profile' %}">profile</a>
+            <a href="{% url 'friends' %}">friends</a>
+            <a href="{% url 'logout' %}">logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="quick-search">
+                <input type="text" placeholder="Quick Search">
+                <button>go</button>
+            </div>
+            <div class="nav-links">
+                <a href="{% url 'profile' %}">My Profile</a>
+                <a href="{% url 'friends' %}">My Friends</a>
+                <a href="{% url 'find_friends' %}">Find Friends</a>
+                <a href="{% url 'privacy_settings' %}">My Privacy</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="search-section">
+                <div class="section-header">Find Friends</div>
+                <div class="section-content">
+                    <form method="get" class="search-box">
+                        <input type="text" name="q" placeholder="Search by name or username..." value="{{ query }}">
+                        <button type="submit">Search</button>
+                    </form>
+
+                    {% if results %}
+                        {% for user in results %}
+                            <div class="user-card">
+                                <a href="{% url 'user_profile' user.id %}" class="user-info" style="text-decoration: none; color: inherit;">
+                                    {% if user.profile.profile_pic %}
+                                        <img src="{{ user.profile.profile_pic.url }}" alt="{{ user.username }}" class="profile-pic">
+                                    {% else %}
+                                        <div class="profile-pic" style="background: #ddd;"></div>
+                                    {% endif %}
+                                    <div class="user-details">
+                                        <h3>{{ user.profile.full_name }}</h3>
+                                        <p>@{{ user.username }}</p>
+                                        {% if user.profile.branch %}
+                                            <p>{{ user.profile.branch }} • {{ user.profile.year }}</p>
+                                        {% endif %}
+                                    </div>
+                                </a>
+                                <div class="user-actions">
+                                    {% if user.is_friend %}
+                                        <button class="action-btn pending-btn" disabled>
+                                            ✓ Friends
+                                        </button>
+                                    {% elif user.friend_request_sent %}
+                                        <button class="action-btn pending-btn" disabled>
+                                            📨 Request Sent
+                                        </button>
+                                    {% elif user.friend_request_received %}
+                                        <form method="post" action="{% url 'accept_request' user.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="action-btn add-btn">
+                                                Accept Request
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <button onclick="sendFriendRequest('{{ user.id }}', this)" class="action-btn add-btn">
+                                            Add Friend
+                                        </button>
+                                    {% endif %}
+                                    <div class="error-message" style="display: none;"></div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% elif query %}
+                        <div class="no-results">
+                            No users found matching "{{ query }}"
+                        </div>
+                    {% else %}
+                        <div class="no-results">
+                            Search for people you may know by their name or username
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function sendFriendRequest(userId, button) {
+            const csrftoken = getCookie('csrftoken');
+            const errorDiv = button.nextElementSibling;
+            
+            try {
+                const response = await fetch(`/send-request/${userId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (response.ok) {
+                    // Update button appearance
+                    button.className = 'action-btn pending-btn';
+                    button.textContent = '📨 Request Sent';
+                    button.disabled = true;
+                    errorDiv.style.display = 'none';
+                } else {
+                    const data = await response.json();
+                    errorDiv.textContent = data.error || 'Failed to send friend request';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Network error occurred';
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html> 

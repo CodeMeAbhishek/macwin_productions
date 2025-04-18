@@ -17,55 +17,20 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from datetime import timedelta
 from django.template.loader import render_to_string
+from .utils import get_user_friends, get_friends_with_unread_messages
 
 @login_required
 def index_view(request):
     if request.method == 'POST':
-        if 'comment_content' in request.POST:
-            # New comment
-            post_id = request.POST.get('post_id')
-            post = Post.objects.get(id=post_id)
-            comment = Comment.objects.create(
-                user=request.user,
-                post=post,
-                content=request.POST.get('comment_content')
-            )
-            # Create notification for comment
-            if post.user != request.user:
-                Notification.objects.create(
-                    user=post.user,
-                    sender=request.user,
-                    notif_type='comment',
-                    message=f"{request.user.username} commented on your post.",
-                    post=post
-                )
-            return redirect('index')
-        else:
-            # New post
-            form = PostForm(request.POST, request.FILES)
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.user = request.user
-                post.save()
-                return redirect('index')
+        return handle_post_request(request)
     
     form = PostForm()
-    
-    # Handle search functionality
-    query = request.GET.get('q')
-    results = None
-    if query:
-        results = User.objects.filter(
-            Q(username__icontains=query) | Q(profile__full_name__icontains=query)
-        ).exclude(id=request.user.id)
-
-    # Get all posts with user, profile, likes and comments information
-    posts = Post.objects.select_related('user', 'user__profile').prefetch_related('likes', 'comments__user').order_by('-timestamp')
-
-    # Get unread notifications count
-    unread_notifications = Notification.objects.filter(user=request.user, is_read=False)
-
     comment_form = CommentForm()
+    query = request.GET.get('q')
+    results = handle_search(query, request.user) if query else None
+    
+    posts = Post.objects.select_related('user', 'user__profile').prefetch_related('likes', 'comments__user').order_by('-timestamp')
+    unread_notifications = Notification.objects.filter(user=request.user, is_read=False)
 
     return render(request, 'chat/index.html', {
         'form': form,
@@ -74,6 +39,43 @@ def index_view(request):
         'results': results,
         'unread_notifications': unread_notifications
     })
+
+def handle_post_request(request):
+    if 'comment_content' in request.POST:
+        return handle_comment(request)
+    else:
+        return handle_post_creation(request)
+
+def handle_comment(request):
+    post_id = request.POST.get('post_id')
+    post = Post.objects.get(id=post_id)
+    comment = Comment.objects.create(
+        user=request.user,
+        post=post,
+        content=request.POST.get('comment_content')
+    )
+    if post.user != request.user:
+        Notification.objects.create(
+            user=post.user,
+            sender=request.user,
+            notif_type='comment',
+            message=f"{request.user.username} commented on your post.",
+            post=post
+        )
+    return redirect('index')
+
+def handle_post_creation(request):
+    form = PostForm(request.POST, request.FILES)
+    if form.is_valid():
+        post = form.save(commit=False)
+        post.user = request.user
+        post.save()
+    return redirect('index')
+
+def handle_search(query, current_user):
+    return User.objects.filter(
+        Q(username__icontains=query) | Q(profile__full_name__icontains=query)
+    ).exclude(id=current_user.id)
 
 def register_view(request):
     if request.method == 'POST':
@@ -138,58 +140,72 @@ def logout_view(request):
 
 @login_required
 def send_friend_request(request, user_id):
-    to_user = User.objects.get(id=user_id)
-    if request.user != to_user:
-        friend_request, created = FriendRequest.objects.get_or_create(from_user=request.user, to_user=to_user)
-        if created:
-            # Create notification for friend request
-            Notification.objects.create(
-                user=to_user,
-                sender=request.user,
-                notif_type='friend_request',
-                message=f"{request.user.username} sent you a friend request."
+    """Send a friend request to another user."""
+    try:
+        to_user = User.objects.get(id=user_id)
+        if request.user != to_user:
+            friend_request, created = FriendRequest.objects.get_or_create(
+                from_user=request.user, 
+                to_user=to_user
             )
-    return redirect('index')
+            if created:
+                # Create notification for friend request
+                Notification.objects.create(
+                    user=to_user,
+                    sender=request.user,
+                    notif_type='friend_request',
+                    message=f"{request.user.username} sent you a friend request."
+                )
+                return JsonResponse({'status': 'success', 'message': 'Friend request sent'})
+            else:
+                return JsonResponse(
+                    {'status': 'error', 'error': 'Friend request already sent'}, 
+                    status=400
+                )
+        else:
+            return JsonResponse(
+                {'status': 'error', 'error': 'You cannot send a friend request to yourself'}, 
+                status=400
+            )
+    except User.DoesNotExist:
+        return JsonResponse(
+            {'status': 'error', 'error': 'User not found'}, 
+            status=404
+        )
+    except Exception as e:
+        return JsonResponse(
+            {'status': 'error', 'error': str(e)}, 
+            status=500
+        )
 
 @login_required
 def cancel_friend_request(request, user_id):
-    to_user = User.objects.get(id=user_id)
-    FriendRequest.objects.filter(from_user=request.user, to_user=to_user).delete()
-    return redirect('index')
+    try:
+        to_user = User.objects.get(id=user_id)
+        FriendRequest.objects.filter(from_user=request.user, to_user=to_user).delete()
+        return JsonResponse({'status': 'success', 'message': 'Friend request cancelled'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'error': str(e)}, status=400)
 
 @login_required
 def accept_friend_request(request, request_id):
-    friend_request = FriendRequest.objects.get(id=request_id)
-    if friend_request.to_user == request.user:
-        friend_request.is_accepted = True
-        friend_request.save()
-    return redirect('index')
+    try:
+        friend_request = FriendRequest.objects.get(id=request_id)
+        if friend_request.to_user == request.user:
+            friend_request.is_accepted = True
+            friend_request.save()
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Friend request accepted',
+                'friend_name': friend_request.from_user.profile.full_name
+            })
+        return JsonResponse({'status': 'error', 'error': 'Invalid request'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'error': str(e)}, status=400)
 
 @login_required
 def friends_list_view(request):
-    sent = FriendRequest.objects.filter(from_user=request.user, is_accepted=True)
-    received = FriendRequest.objects.filter(to_user=request.user, is_accepted=True)
-    friends = [fr.to_user for fr in sent] + [fr.from_user for fr in received]
-
-    friends_data = []
-    for friend in friends:
-        unread_count = Message.objects.filter(
-            sender=friend,
-            receiver=request.user,
-            is_read=False
-        ).count()
-
-        last_message = Message.objects.filter(
-            Q(sender=request.user, receiver=friend) |
-            Q(sender=friend, receiver=request.user)
-        ).order_by('-timestamp').first()
-
-        friends_data.append({
-            'user': friend,
-            'unread': unread_count,
-            'last_message': last_message
-        })
-
+    friends_data = get_friends_with_unread_messages(request.user)
     return render(request, 'chat/friends.html', {'friends': friends_data})
 
 
@@ -206,6 +222,27 @@ def find_friends_view(request):
         ).exclude(
             id__in=[request.user.id] + [friend.id for friend in current_user_friends]
         )
+        
+        # Add friend request status for each user
+        for user in results:
+            # Check if friend request is sent
+            user.friend_request_sent = FriendRequest.objects.filter(
+                from_user=request.user,
+                to_user=user,
+                is_accepted=False
+            ).exists()
+            # Check if friend request is received
+            user.friend_request_received = FriendRequest.objects.filter(
+                from_user=user,
+                to_user=request.user,
+                is_accepted=False
+            ).exists()
+            # Check if they are friends
+            user.is_friend = FriendRequest.objects.filter(
+                (Q(from_user=request.user, to_user=user) |
+                Q(from_user=user, to_user=request.user)),
+                is_accepted=True
+            ).exists()
 
     return render(request, 'chat/find_friends.html', {
         'results': results,
@@ -474,3 +511,65 @@ def delete_notification(request, notif_id):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'success'})
     return redirect('notifications')
+
+@login_required
+def messages_view(request):
+    """View all messages across all conversations."""
+    friends_data = get_friends_with_unread_messages(request.user)
+    return render(request, 'chat/messages.html', {
+        'friends_data': friends_data
+    })
+
+@login_required
+def account_view(request):
+    """View and manage account settings."""
+    if request.method == 'POST':
+        # Handle password change
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if new_password == confirm_password:
+            user = authenticate(username=request.user.username, password=current_password)
+            if user is not None:
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, "Password updated successfully!")
+                login(request, user)  # Re-login the user
+            else:
+                messages.error(request, "Current password is incorrect.")
+        else:
+            messages.error(request, "New passwords don't match.")
+    
+    return render(request, 'chat/account.html')
+
+@login_required
+def privacy_view(request):
+    """View and manage privacy settings."""
+    profile = request.user.profile
+    
+    if request.method == 'POST':
+        # Update privacy settings
+        profile.relationship_status = request.POST.get('relationship_status', '')
+        profile.save()
+        messages.success(request, "Privacy settings updated!")
+    
+    return render(request, 'chat/privacy.html', {
+        'profile': profile
+    })
+
+@login_required
+def remove_friend(request, user_id):
+    try:
+        friend = get_object_or_404(User, id=user_id)
+        FriendRequest.objects.filter(
+            (Q(from_user=request.user, to_user=friend) |
+             Q(from_user=friend, to_user=request.user)),
+            is_accepted=True
+        ).delete()
+        return JsonResponse({
+            'status': 'success',
+            'message': f'Removed {friend.profile.full_name} from your friends'
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'error': str(e)}, status=400)

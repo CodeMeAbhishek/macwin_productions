@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Friends | MacWin</title>
+  <title>My Friends - MacWin</title>
   <style>
     body {
       margin: 0;
@@ -93,29 +93,69 @@
       background: white;
     }
     .friend-card {
-      padding: 5px;
-      border-bottom: 1px solid #eee;
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      border-radius: 3px;
+      background: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .friend-card:last-child {
-      border-bottom: none;
+    .friend-info {
+      flex: 1;
     }
-    .friend-card a {
-      color: #3b5998;
+    .friend-actions {
+      display: flex;
+      gap: 5px;
+    }
+    .friend-actions form {
+      margin: 0;
+    }
+    .friend-actions button {
+      padding: 2px 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .remove-btn {
+      background: #e4e6eb;
+      border: 1px solid #bec3c9;
+      color: #4b4f56;
+    }
+    .remove-btn:hover {
+      background: #d8dadf;
+    }
+    .message-btn {
+      background: #e7f3ff;
+      border: 1px solid #bdc7d8;
+      color: #1877f2;
+    }
+    .message-btn:hover {
+      background: #dbe7f2;
+    }
+    .profile-pic {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .friend-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .find-friends-btn {
+      background: #42b72a;
+      color: white;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 2px;
+      font-size: 12px;
       text-decoration: none;
-      font-weight: normal;
     }
-    .friend-card a:hover {
-      text-decoration: underline;
-    }
-    .friend-card .unread {
-      color: #dd3c10;
-      font-size: 10px;
-    }
-    .friend-card .last-message {
-      color: #777;
-      font-size: 10px;
-      margin-top: 2px;
-      margin-left: 10px;
+    .find-friends-btn:hover {
+      background: #36a420;
     }
     .no-friends {
       color: #666;
@@ -144,35 +184,59 @@
       <div class="nav-links">
         <a href="{% url 'profile' %}">My Profile</a>
         <a href="{% url 'friends' %}">My Friends</a>
-        <a href="#">My Messages</a>
-        <a href="#">My Account</a>
-        <a href="#">My Privacy</a>
+        <a href="{% url 'find_friends' %}">Find Friends</a>
+        <a href="{% url 'privacy_settings' %}">My Privacy</a>
       </div>
     </div>
 
     <div class="main-content">
       <div class="friends-section">
-        <div class="section-header">Friends at MacWin</div>
+        <div class="friend-header">
+          <div class="section-header">My Friends</div>
+          <a href="{% url 'find_friends' %}" class="find-friends-btn">Find New Friends</a>
+        </div>
         <div class="section-content">
           {% if friends %}
             {% for friend in friends %}
               <div class="friend-card">
-                <a href="{% url 'chat_with_friend' friend.user.id %}">
-                  {{ friend.user.profile.full_name }}
-                  {% if friend.unread > 0 %}
-                    <span class="unread">({{ friend.unread }} new)</span>
+                <div style="display: flex; align-items: center;">
+                  {% if friend.user.profile.profile_pic %}
+                    <img src="{{ friend.user.profile.profile_pic.url }}" alt="{{ friend.user.username }}" class="profile-pic">
+                  {% else %}
+                    <div class="profile-pic" style="background: #ddd;"></div>
                   {% endif %}
-                </a>
-                {% if friend.last_message %}
-                  <div class="last-message">
-                    {{ friend.last_message.sender.profile.full_name }}: 
-                    {{ friend.last_message.content|truncatechars:30 }}
+                  <div class="friend-info">
+                    <div style="font-weight: bold;">{{ friend.user.profile.full_name }}</div>
+                    <div style="color: #65676b; font-size: 12px;">@{{ friend.user.username }}</div>
+                    {% if friend.user.profile.branch %}
+                      <div style="color: #65676b; font-size: 11px;">{{ friend.user.profile.branch }} • {{ friend.user.profile.year }}</div>
+                    {% endif %}
                   </div>
-                {% endif %}
+                </div>
+                <div class="friend-actions">
+                  <a href="{% url 'chat_with_friend' friend.user.id %}" class="message-btn">
+                    Message
+                    {% if friend.unread > 0 %}
+                      <span style="color: #dd3c10;">({{ friend.unread }})</span>
+                    {% endif %}
+                  </a>
+                  <a href="{% url 'user_profile' friend.user.id %}" class="message-btn">View Profile</a>
+                  <form method="post" action="{% url 'remove_friend' friend.user.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="remove-btn" onclick="return confirm('Are you sure you want to remove {{ friend.user.profile.full_name }} from your friends?')">
+                      Remove
+                    </button>
+                  </form>
+                </div>
               </div>
             {% endfor %}
           {% else %}
-            <div class="no-friends">You have no friends yet. Try searching for people you know!</div>
+            <div style="text-align: center; padding: 20px; color: #65676b;">
+              <p>You haven't added any friends yet.</p>
+              <a href="{% url 'find_friends' %}" class="find-friends-btn" style="display: inline-block; margin-top: 10px;">
+                Find Friends
+              </a>
+            </div>
           {% endif %}
         </div>
       </div>

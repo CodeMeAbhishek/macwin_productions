@@ -3,39 +3,56 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import User
 from .models import Message
+from django.core.exceptions import ObjectDoesNotExist
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f"chat_{self.room_name}"
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-        await self.accept()
+        try:
+            self.room_name = self.scope['url_route']['kwargs']['room_name']
+            self.room_group_name = f"chat_{self.room_name}"
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            await self.accept()
+        except Exception as e:
+            await self.close(code=4000)  # Close with error code
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        try:
+            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        except Exception:
+            pass  # Ignore errors during disconnect
 
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        message_type = data.get('type', 'chat_message')
-        
-        if message_type == 'read_receipt':
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'read_receipt',
-                    'sender': data['sender'],
-                    'receiver': data['receiver']
-                }
-            )
-            # Update message as read in database
-            if 'receiver' in data and 'sender' in data:
-                await self.mark_messages_as_read(data['sender'], data['receiver'])
-        else:
-            message = data['message']
+        try:
+            data = json.loads(text_data)
+            message_type = data.get('type', 'chat_message')
+            
+            if message_type == 'read_receipt':
+                await self.handle_read_receipt(data)
+            else:
+                await self.handle_chat_message(data)
+        except json.JSONDecodeError:
+            await self.send_error("Invalid message format")
+        except Exception as e:
+            await self.send_error("An error occurred processing your message")
+
+    async def handle_read_receipt(self, data):
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'read_receipt',
+                'sender': data['sender'],
+                'receiver': data['receiver']
+            }
+        )
+        if 'receiver' in data and 'sender' in data:
+            await self.mark_messages_as_read(data['sender'], data['receiver'])
+
+    async def handle_chat_message(self, data):
+        try:
             sender = await self.get_user(data['sender'])
             receiver = await self.get_user(data['receiver'])
+            message = data['message']
             
-            # Save message to database
             await self.save_message(sender, receiver, message)
             
             await self.channel_layer.group_send(
@@ -47,6 +64,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'receiver': data['receiver']
                 }
             )
+        except ObjectDoesNotExist:
+            await self.send_error("User not found")
+        except Exception as e:
+            await self.send_error("Failed to send message")
+
+    async def send_error(self, message):
+        await self.send(text_data=json.dumps({
+            'type': 'error',
+            'message': message
+        }))
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({

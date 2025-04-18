@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -97,7 +98,58 @@
         background: #f8f9fa;
         border-radius: 8px;
       }
+      .friend-actions {
+        margin: 15px 0;
+      }
+      .action-btn {
+        padding: 6px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .message-btn {
+        background: #e7f3ff;
+        border: 1px solid #bdc7d8;
+        color: #1877f2;
+      }
+      .message-btn:hover {
+        background: #dbe7f2;
+      }
+      .remove-btn {
+        background: #e4e6eb;
+        border: 1px solid #bec3c9;
+        color: #4b4f56;
+      }
+      .remove-btn:hover {
+        background: #d8dadf;
+      }
+      .add-btn {
+        background: #42b72a;
+        border: none;
+        color: white;
+      }
+      .add-btn:hover {
+        background: #36a420;
+      }
+      .cancel-btn, .decline-btn {
+        background: #e4e6eb;
+        border: 1px solid #bec3c9;
+        color: #4b4f56;
+      }
+      .accept-btn {
+        background: #42b72a;
+        border: none;
+        color: white;
+        margin-right: 10px;
+      }
+      .pending-request {
+        color: #65676b;
+        font-size: 13px;
+      }
     </style>
+    <script src="{% static 'chat/js/friend_actions.js' %}"></script>
   </head>
   <body>
     <div class="profile-card">
@@ -121,23 +173,31 @@
       </p>
       <p>{{ other_user.profile.bio }}</p>
 
-      {% if is_friend %}
-      <p>✅ You and {{ other_user.username }} are friends.</p>
-      {% elif friend_request_sent %}
-      <p>📨 Friend request sent!</p>
-      {% elif friend_request_received %}
-      <p>Friend request received!</p>
-      <form method="post" action="{% url 'user_profile' other_user.id %}">
-        {% csrf_token %}
-        <input type="hidden" name="action" value="accept_request">
-        <button type="submit">Accept Friend Request</button>
-      </form>
-      {% else %}
-      <form method="post" action="{% url 'send_request' other_user.id %}">
-        {% csrf_token %}
-        <button type="submit">Send Friend Request</button>
-      </form>
-      {% endif %}
+      <div class="friend-actions" style="margin: 15px 0;" data-user-id="{{ other_user.id }}">
+        {% if is_friend %}
+          <div style="display: flex; gap: 10px;">
+            <a href="{% url 'chat_with_friend' other_user.id %}" class="action-btn message-btn">
+              Message
+            </a>
+            <button onclick="removeFriend('{{ other_user.id }}', this)" class="action-btn pending-btn">
+              ✓ Friends
+            </button>
+          </div>
+        {% elif friend_request_sent %}
+          <button onclick="cancelFriendRequest('{{ other_user.id }}', this)" class="action-btn pending-btn">
+            📨 Request Sent
+          </button>
+        {% elif friend_request_received %}
+          <button onclick="acceptFriendRequest('{{ friend_request.id }}', '{{ other_user.id }}', this)" class="action-btn add-btn">
+            Accept Request
+          </button>
+        {% else %}
+          <button onclick="sendFriendRequest('{{ other_user.id }}', this)" class="action-btn add-btn">
+            Add Friend
+          </button>
+        {% endif %}
+        <div class="error-message" style="display: none;"></div>
+      </div>
 
       <div class="friends-section">
         <h3>Friends ({{ friends|length }})</h3>
