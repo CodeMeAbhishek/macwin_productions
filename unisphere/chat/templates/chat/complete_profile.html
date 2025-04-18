@@ -2,20 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Profile | Unisphere</title>
+  <title>Complete Your Profile | Unisphere</title>
   <style>
     body {
       font-family: sans-serif;
-      background: #f7fafc;
+      background: #edf2f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       padding: 2rem;
     }
-    .profile-card {
-      max-width: 600px;
-      margin: auto;
+    .form-box {
       background: white;
       padding: 2rem;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      width: 500px;
     }
     input, select, textarea, button {
       width: 100%;
@@ -26,26 +28,25 @@
       border: 1px solid #ccc;
     }
     button {
-      background: #4299e1;
+      background: #48bb78;
       color: white;
       border: none;
       cursor: pointer;
       margin-top: 1rem;
     }
     button:hover {
-      background: #3182ce;
+      background: #38a169;
     }
   </style>
 </head>
 <body>
-  <div class="profile-card">
-    <h2>My Profile</h2>
+  <div class="form-box">
+    <h2>Complete Your Profile</h2>
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="submit">Save Changes</button>
+      <button type="submit">Save & Go to Login</button>
     </form>
-    <a href="{% url 'index' %}" style="display: block; margin-top: 1rem;">← Back to Home</a>
   </div>
 </body>
-</html> 
+</html>

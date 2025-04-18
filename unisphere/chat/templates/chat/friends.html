@@ -48,19 +48,20 @@
     <div><strong>Unisphere</strong></div>
     <div class="nav-links">
       <a href="{% url 'index' %}">Home</a>
+      <a href="{% url 'profile' %}">My Profile</a>
       <a href="#">Chat</a>
       <a href="{% url 'logout' %}">Logout</a>
     </div>
   </header>
 
   <div class="container">
-    <h2>Friends of {{ request.user.username }}</h2>
+    <h2>Chat with your friends</h2>
 
     {% if friends %}
       {% for friend in friends %}
         <div class="friend-card">
           <a href="{% url 'chat_with_friend' friend.user.id %}">
-            {{ friend.user.username }}
+            {{ friend.user.profile.full_name }}
             
             {% if friend.unread > 0 %}
               <span style="color: red;">({{ friend.unread }} new)</span>
@@ -68,7 +69,7 @@
 
             {% if friend.last_message %}
               <div style="font-size: 0.9em; color: #666;">
-                {{ friend.last_message.sender.username }}: 
+                {{ friend.last_message.sender.profile.full_name }}: 
                 {{ friend.last_message.content|truncatechars:30 }}
               </div>
             {% endif %}

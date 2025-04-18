@@ -85,7 +85,7 @@
 <body>
   <div class="chat-box">
     <div class="chat-header">
-      <span>Chat with {{ friend.username }}</span>
+      <span>Chat with {{ friend.profile.full_name }}</span>
       <a href="{% url 'friends' %}" class="back-link">← Back to Friends</a>
     </div>
 

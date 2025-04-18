@@ -15,5 +15,6 @@ path('user/<int:user_id>/', views.user_profile_view, name='user_profile'),
 path('send-request/<int:user_id>/', views.send_friend_request, name='send_request'),
 path('accept-request/<int:request_id>/', views.accept_friend_request, name='accept_request'),
 path('chat/<int:friend_id>/', views.chat_with_friend, name='chat_with_friend'),
+path('complete-profile/<int:user_id>/', views.complete_profile_view, name='complete_profile'),
 
 ]

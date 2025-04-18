@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import RegisterForm, ProfileForm
+from .forms import RegisterForm, ProfileForm, ProfileCompletionForm
 from .models import Profile
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -22,33 +22,18 @@ def index_view(request):
 
 def register_view(request):
     if request.method == 'POST':
-        form = RegisterForm(request.POST, request.FILES)
+        form = RegisterForm(request.POST)
         if form.is_valid():
-            if User.objects.filter(username=form.cleaned_data['username']).exists():
-                form.add_error('username', 'Username already taken.')
-                return render(request, 'chat/register.html', {'form': form})
-
             user = User.objects.create_user(
                 username=form.cleaned_data['username'],
                 email=form.cleaned_data['email'],
                 password=form.cleaned_data['password']
             )
-
-            Profile.objects.create(
-                user=user,
-                full_name=form.cleaned_data['full_name'],
-                branch=form.cleaned_data['branch'],
-                year=form.cleaned_data['year'],
-                bio=form.cleaned_data['bio'],
-                profile_pic=form.cleaned_data.get('profile_pic'),
-                relationship_status=form.cleaned_data['relationship_status']
-            )
-
-            messages.success(request, "Registration successful!")
-            return redirect('login')
+            return redirect('complete_profile', user_id=user.id)
     else:
         form = RegisterForm()
     return render(request, 'chat/register.html', {'form': form})
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -209,3 +194,17 @@ def chat_with_friend(request, friend_id):
         'chat_messages': messages_qs,
         'room_name': room_name
     })
+
+def complete_profile_view(request, user_id):
+    user = User.objects.get(id=user_id)
+    if request.method == 'POST':
+        form = ProfileCompletionForm(request.POST, request.FILES)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = user
+            profile.save()
+            messages.success(request, "Profile completed. Please login.")
+            return redirect('login')
+    else:
+        form = ProfileCompletionForm()
+    return render(request, 'chat/complete_profile.html', {'form': form})
