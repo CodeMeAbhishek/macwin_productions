@@ -2,101 +2,515 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Unisphere Home</title>
+    <title>MacWin Home</title>
     <style>
         body {
-            font-family: sans-serif;
-            background: #f0f4f8;
             margin: 0;
+            padding: 0;
+            font-family: "Tahoma", "Verdana", sans-serif;
+            background-color: #fff;
+            font-size: 11px;
         }
-        header {
-            background: #2b6cb0;
-            padding: 1rem;
+        .header {
+            background-color: #3b5998;
+            padding: 2px 5px;
             color: white;
+            border-bottom: 1px solid #1d4088;
             display: flex;
+            align-items: center;
             justify-content: space-between;
+            padding-right: 15px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 14px;
+            padding: 2px;
+        }
+        .header-search {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+            display: flex;
             align-items: center;
         }
-        .nav-links a {
-            margin-left: 15px;
+        .header-search input {
+            width: 100%;
+            padding: 3px 8px;
+            font-size: 11px;
+            border: 1px solid #1d4088;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+        .header-search button {
+            padding: 2px 10px;
+            font-size: 11px;
+            background: #5b79b4;
+            color: white;
+            border: 1px solid #1d4088;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .header-search button:hover {
+            background: #4668a0;
+        }
+        .header-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-links a {
             color: white;
             text-decoration: none;
-            font-weight: bold;
+            font-size: 11px;
         }
         .container {
-            padding: 2rem;
+            width: 800px;
+            margin: 20px auto;
+            display: flex;
         }
-        form {
-            margin-bottom: 1rem;
+        .sidebar {
+            width: 200px;
+            margin-right: 20px;
         }
-        input[type="text"] {
+        .quick-search {
+            border: 1px solid #b3b3b3;
             padding: 8px;
-            width: 60%;
-            max-width: 400px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            margin-bottom: 10px;
+            background: #f7f7f7;
         }
-        button {
-            padding: 8px 16px;
-            margin-left: 10px;
+        .quick-search input {
+            width: 120px;
+            padding: 2px;
+            font-size: 11px;
+            border: 1px solid #bdc7d8;
+        }
+        .quick-search button {
+            padding: 1px 6px;
+            font-size: 11px;
+            background: #3b5998;
+            color: white;
+            border: 1px solid #1d4088;
+            cursor: pointer;
+        }
+        .nav-links {
+            border: 1px solid #b3b3b3;
+            padding: 8px;
+            background: #f7f7f7;
+        }
+        .nav-links a {
+            display: block;
+            color: #3b5998;
+            text-decoration: none;
+            padding: 3px 0;
+        }
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+        .main-content {
+            flex: 1;
+        }
+        .welcome-section {
+            border: 1px solid #b3b3b3;
+            margin-bottom: 20px;
+        }
+        .section-header {
+            background: #3b5998;
+            color: white;
+            padding: 4px 8px;
+            font-weight: bold;
+        }
+        .section-content {
+            padding: 10px;
+            background: white;
+        }
+        .search-box {
+            margin-bottom: 15px;
+        }
+        .search-box input {
+            width: 70%;
+            padding: 2px;
+            font-size: 11px;
+            border: 1px solid #bdc7d8;
+        }
+        .search-box button {
+            padding: 2px 6px;
+            font-size: 11px;
+            background: #3b5998;
+            color: white;
+            border: 1px solid #1d4088;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .search-box button:hover {
+            background: #2f477a;
+        }
+        .results {
+            margin-top: 10px;
+        }
+        .user-card {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .user-card:last-child {
+            border-bottom: none;
+        }
+        .user-card a {
+            color: #3b5998;
+            text-decoration: none;
+        }
+        .user-card a:hover {
+            text-decoration: underline;
+        }
+        .welcome-text {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .no-results {
+            color: #666;
+            font-style: italic;
+            padding: 5px;
+        }
+        .feed-container {
+            max-width: 700px;
+            margin: auto;
+        }
+        .post-form {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .post-form textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        .post-form button {
+            margin-top: 10px;
+            padding: 10px 20px;
             background: #4299e1;
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
         }
-        .results {
-            margin-top: 20px;
-        }
-        .user-card {
+        .post-card {
             background: white;
             padding: 1rem;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
         }
-        .user-card a {
-            font-weight: bold;
-            text-decoration: none;
-            color: #2b6cb0;
+        .post-card h4 {
+            margin-bottom: 0.2rem;
+        }
+        .post-card small {
+            color: #666;
+        }
+        .like-button {
+            padding: 2px 6px;
+            font-size: 11px;
+            background: #3b5998;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        #notif-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        #notif-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            padding: 0 4px;
+            display: flex;
+            align-items: center;
+        }
+        #notif-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e53e3e;
+            color: white;
+            border-radius: 50%;
+            padding: 1px 4px;
+            font-size: 9px;
+            min-width: 14px;
+            text-align: center;
+        }
+        #notif-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            border-radius: 3px;
+            z-index: 1000;
+            margin-top: 5px;
+            border: 1px solid #1d4088;
         }
     </style>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function handleLike(postId, button) {
+            const csrftoken = getCookie('csrftoken');
+            
+            fetch(`/like/${postId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update button text and likes count
+                const likesCount = button.closest('.post-card').querySelector('.likes-count');
+                if (data.liked) {
+                    button.innerHTML = '❤️ Unlike';
+                } else {
+                    button.innerHTML = '🤍 Like';
+                }
+                likesCount.textContent = `${data.likes_count} like${data.likes_count !== 1 ? 's' : ''}`;
+            });
+        }
+
+        function initializeLikeButtons() {
+            document.querySelectorAll('.like-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    handleLike(this.dataset.postId, this.querySelector('button'));
+                });
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', initializeLikeButtons);
+
+        document.getElementById('notif-btn').addEventListener('click', function (e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('notif-dropdown');
+            if (dropdown.style.display === 'block') {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            fetch('/notifications/', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                dropdown.innerHTML = data.html;
+                dropdown.style.display = 'block';
+                const count = document.getElementById('notif-count');
+                if (count) count.remove();
+            });
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('notif-dropdown');
+            const btn = document.getElementById('notif-btn');
+            if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    </script>
 </head>
 <body>
-    <header>
-        <div>
-            <strong>Unisphere</strong>
-        </div>
-        <div class="nav-links">
-            <a href="{% url 'profile' %}">My Profile</a>
-            <a href="{% url 'friends' %}">Friends List</a>
-            <a href="#">Chat</a>
-            <a href="{% url 'logout' %}">Logout</a>
-        </div>
-    </header>
-
-    <div class="container">
-        <h2>Welcome, {{ request.user.username }}!</h2>
-
-        <form method="get">
+    <div class="header">
+        <h1>[ macwin ]</h1>
+        <form method="get" class="header-search">
             <input type="text" name="q" placeholder="Search users by name or username..." value="{{ request.GET.q }}">
             <button type="submit">Search</button>
         </form>
-
-        {% if results %}
-            <div class="results">
-                <h3>Search Results:</h3>
-                {% for user in results %}
-                    <div class="user-card">
-                        <a href="{% url 'user_profile' user.id %}">
-                            {{ user.username }} — {{ user.profile.full_name }}
-                        </a>
-                    </div>
-                {% endfor %}
+        <div class="header-links">
+            <a href="{% url 'index' %}">home</a>
+            <a href="{% url 'profile' %}">profile</a>
+            <a href="{% url 'friends' %}">friends</a>
+            <a href="{% url 'notifications' %}">notifications</a>
+            <a href="{% url 'logout' %}">logout</a>
+            <div id="notif-wrapper">
+                <button id="notif-btn">
+                    🔔
+                    {% with unread_count=unread_notifications|length %}
+                        {% if unread_count > 0 %}
+                            <span class="notif-count">{{ unread_count }}</span>
+                        {% endif %}
+                    {% endwith %}
+                </button>
+                <div id="notif-dropdown">
+                    <!-- AJAX loaded notifications go here -->
+                </div>
             </div>
-        {% elif request.GET.q %}
-            <p>No users found for "{{ request.GET.q }}"</p>
-        {% endif %}
+        </div>
     </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="quick-search">
+                <input type="text" placeholder="Quick Search">
+                <button>go</button>
+            </div>
+            <div class="nav-links">
+                <a href="{% url 'profile' %}">My Profile</a>
+                <a href="{% url 'friends' %}">My Friends</a>
+                <a href="#">My Messages</a>
+                <a href="#">My Account</a>
+                <a href="#">My Privacy</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            {% if results %}
+                <div class="search-results-section" style="border: 1px solid #b3b3b3; margin-bottom: 20px;">
+                    <div class="section-header">Search Results</div>
+                    <div class="section-content">
+                        {% for user in results %}
+                            <div class="user-card">
+                                <a href="{% url 'user_profile' user.id %}">
+                                    {{ user.username }} — {{ user.profile.full_name }}
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% elif request.GET.q %}
+                <div class="search-results-section" style="border: 1px solid #b3b3b3; margin-bottom: 20px;">
+                    <div class="section-header">Search Results</div>
+                    <div class="section-content">
+                        <div class="no-results">No users found for "{{ request.GET.q }}"</div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="welcome-section">
+                <div class="section-header">Welcome to MacWin</div>
+                <div class="section-content">
+                    <div class="welcome-text">
+                        Welcome, {{ request.user.profile.full_name }}!
+                    </div>
+
+                    <div class="feed-container">
+                        <div class="post-form">
+                            <h3>Start a new post</h3>
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                {{ form.content }}
+                                <div style="margin-top: 10px;">
+                                    {{ form.image }}
+                                </div>
+                                <button type="submit">Post</button>
+                            </form>
+                        </div>
+
+                        {% for post in posts %}
+                            <div class="post-card">
+                                <h4>
+                                    <a href="{% url 'user_profile' post.user.id %}" style="color:#1877f2; text-decoration:none;">
+                                        {{ post.user.profile.full_name }}
+                                    </a>
+                                    <small style="color:#666;">
+                                        (<a href="{% url 'user_profile' post.user.id %}" style="color:#666; text-decoration:none;">@{{ post.user.username }}</a>)
+                                    </small>
+                                </h4>
+                                <small>{{ post.timestamp|date:"M d, H:i" }}</small>
+                                <p>{{ post.content }}</p>
+                                
+                                {% if post.image %}
+                                    <img src="{{ post.image.url }}" style="width:100%; max-height: 400px; object-fit: cover; margin-top: 10px; border-radius: 8px;" />
+                                {% endif %}
+
+                                <form class="like-form" data-post-id="{{ post.id }}" style="display:inline;">
+                                    {% csrf_token %}
+                                    {% with has_liked=post.likes.all %}
+                                    {% if request.user in has_liked %}
+                                        <button type="submit" class="like-button">❤️ Unlike</button>
+                                    {% else %}
+                                        <button type="submit" class="like-button">🤍 Like</button>
+                                    {% endif %}
+                                    {% endwith %}
+                                </form>
+                                <small class="likes-count">{{ post.likes.count }} like{{ post.likes.count|pluralize }}</small>
+
+                                {% if post.user == request.user %}
+                                <div style="margin-top: 10px;">
+                                    <a href="{% url 'edit_post' post.id %}" style="color: #3b5998; text-decoration: none; font-size: 11px;">✏️ Edit</a>
+                                    |
+                                    <a href="{% url 'delete_post' post.id %}" 
+                                       style="color: #cc0000; text-decoration: none; font-size: 11px;"
+                                       onclick="return confirm('Are you sure you want to delete this post?');">❌ Delete</a>
+                                </div>
+                                {% endif %}
+
+                                <!-- Comments Section -->
+                                <div class="comments-section" style="margin-top: 1rem;">
+                                    {% for comment in post.comments.all %}
+                                        <div class="comment" style="border-top: 1px solid #eee; padding: 8px 0;">
+                                            <a href="{% url 'user_profile' comment.user.id %}" style="color:#1877f2; text-decoration:none;">
+                                                <strong>{{ comment.user.username }}</strong>
+                                            </a>: {{ comment.content }}
+                                            {% if comment.user == request.user %}
+                                                <a href="{% url 'delete_comment' comment.id %}" 
+                                                   style="color: #cc0000; text-decoration: none; font-size: 11px; margin-left: 5px;"
+                                                   onclick="return confirm('Are you sure you want to delete this comment?');">❌</a>
+                                            {% endif %}
+                                            <br>
+                                            <small style="color:#666;">{{ comment.timestamp|date:"M d, H:i" }}</small>
+                                        </div>
+                                    {% empty %}
+                                        <small style="color:#888;">No comments yet</small>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Comment Form -->
+                                <form method="post" class="comment-form" style="margin-top: 10px;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                                    <input type="text" name="comment_content" placeholder="Write a comment..." 
+                                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer style="margin-top: 4rem; text-align: center; font-size: 11px; color: #888;">
+        <a href="{% url 'about' %}" style="color: #3b5998; text-decoration: none;">About</a> |
+        <a href="{% url 'contact' %}" style="color: #3b5998; text-decoration: none;">Contact</a> |
+        <a href="{% url 'faq' %}" style="color: #3b5998; text-decoration: none;">FAQ</a> |
+        <a href="{% url 'terms' %}" style="color: #3b5998; text-decoration: none;">Terms</a> |
+        <a href="{% url 'privacy' %}" style="color: #3b5998; text-decoration: none;">Privacy</a>
+    </footer>
 </body>
 </html>

@@ -2,50 +2,200 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Profile | Unisphere</title>
+  <title>My Profile | MacWin</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f7fafc;
-      padding: 2rem;
+      margin: 0;
+      padding: 0;
+      font-family: "Tahoma", "Verdana", sans-serif;
+      background-color: #fff;
+      font-size: 11px;
     }
-    .profile-card {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .header {
+      background-color: #3b5998;
+      padding: 2px 5px;
+      color: white;
+      border-bottom: 1px solid #1d4088;
     }
-    input, select, textarea, button {
-      width: 100%;
-      margin-top: 10px;
+    .header h1 {
+      margin: 0;
+      font-size: 14px;
+      padding: 2px;
+    }
+    .header-links {
+      float: right;
+      margin-top: -20px;
+    }
+    .header-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 10px;
+      font-size: 11px;
+    }
+    .container {
+      width: 800px;
+      margin: 20px auto;
+      display: flex;
+    }
+    .sidebar {
+      width: 200px;
+      margin-right: 20px;
+    }
+    .quick-search {
+      border: 1px solid #b3b3b3;
+      padding: 8px;
+      margin-bottom: 10px;
+      background: #f7f7f7;
+    }
+    .quick-search input {
+      width: 120px;
+      padding: 2px;
+      font-size: 11px;
+      border: 1px solid #bdc7d8;
+    }
+    .quick-search button {
+      padding: 1px 6px;
+      font-size: 11px;
+      background: #3b5998;
+      color: white;
+      border: 1px solid #1d4088;
+      cursor: pointer;
+    }
+    .nav-links {
+      border: 1px solid #b3b3b3;
+      padding: 8px;
+      background: #f7f7f7;
+    }
+    .nav-links a {
+      display: block;
+      color: #3b5998;
+      text-decoration: none;
+      padding: 3px 0;
+    }
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+    .main-content {
+      flex: 1;
+    }
+    .profile-section {
+      border: 1px solid #b3b3b3;
+      margin-bottom: 20px;
+    }
+    .section-header {
+      background: #3b5998;
+      color: white;
+      padding: 4px 8px;
+      font-weight: bold;
+    }
+    .section-content {
       padding: 10px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      background: white;
+    }
+    .profile-pic {
+      max-width: 200px;
+      margin-bottom: 10px;
+    }
+    input, select, textarea {
+      width: 95%;
+      padding: 2px;
+      font-size: 11px;
+      border: 1px solid #bdc7d8;
+      margin-bottom: 5px;
+    }
+    label {
+      display: block;
+      margin-top: 8px;
+      color: #333;
+      font-weight: bold;
     }
     button {
-      background: #4299e1;
+      background-color: #3b5998;
       color: white;
-      border: none;
+      border: 1px solid #1d4088;
+      padding: 2px 6px;
       cursor: pointer;
-      margin-top: 1rem;
+      font-size: 11px;
+      margin-top: 10px;
     }
     button:hover {
-      background: #3182ce;
+      background-color: #2f477a;
     }
   </style>
 </head>
 <body>
-  <div class="profile-card">
-    <h2>My Profile</h2>
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">Save Changes</button>
-    </form>
-    <a href="{% url 'index' %}" style="display: block; margin-top: 1rem;">← Back to Home</a>
+  <div class="header">
+    <h1>[ macwin ]</h1>
+    <div class="header-links">
+      <a href="{% url 'index' %}">home</a>
+      <a href="{% url 'profile' %}">profile</a>
+      <a href="{% url 'friends' %}">friends</a>
+      <a href="{% url 'logout' %}">logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="quick-search">
+        <input type="text" placeholder="Quick Search">
+        <button>go</button>
+      </div>
+      <div class="nav-links">
+        <a href="{% url 'profile' %}">My Profile [ edit ]</a>
+        <a href="{% url 'friends' %}">My Friends</a>
+        <a href="#">My Messages</a>
+        <a href="#">My Account</a>
+        <a href="#">My Privacy</a>
+      </div>
+
+      <div class="profile-section" style="margin-top: 20px;">
+        <div class="section-header">My Friends</div>
+        <div class="section-content">
+          {% if friends %}
+            {% for friend in friends %}
+              <div class="friend-item" style="display: flex; align-items: center; margin-bottom: 10px; padding: 5px;">
+                {% if friend.profile.profile_pic %}
+                  <img src="{{ friend.profile.profile_pic.url }}" alt="{{ friend.username }}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+                {% else %}
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: #ddd; margin-right: 10px;"></div>
+                {% endif %}
+                <div>
+                  <a href="{% url 'user_profile' friend.id %}" style="color: #3b5998; text-decoration: none; font-weight: bold;">
+                    {{ friend.profile.full_name }}
+                  </a>
+                  <div style="color: #666; font-size: 10px;">@{{ friend.username }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p style="color: #666; text-align: center;">No friends yet</p>
+            <a href="{% url 'find_friends' %}" style="display: block; text-align: center; color: #3b5998; text-decoration: none; margin-top: 5px;">Find Friends</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="profile-section">
+        <div class="section-header">Picture</div>
+        <div class="section-content">
+          {% if user.profile.profile_pic %}
+            <img src="{{ user.profile.profile_pic.url }}" alt="Profile Picture" class="profile-pic">
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="section-header">Information</div>
+        <div class="section-content">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save Changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </body>
 </html> 

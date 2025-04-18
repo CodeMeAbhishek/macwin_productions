@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Post | MacWin</title>
+    <style>
+        body { 
+            font-family: "Tahoma", "Verdana", sans-serif;
+            background: #f0f4f8;
+            padding: 2rem;
+            margin: 0;
+        }
+        .edit-box {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        button {
+            margin-top: 1rem;
+            padding: 10px 20px;
+            background: #3b5998;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .header {
+            background-color: #3b5998;
+            padding: 2px 5px;
+            color: white;
+            border-bottom: 1px solid #1d4088;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 14px;
+            padding: 2px;
+        }
+        .cancel-link {
+            color: #666;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>[ macwin ]</h1>
+    </div>
+    <div class="edit-box">
+        <h2>Edit Your Post</h2>
+        <form method="post">
+            {% csrf_token %}
+            <textarea name="content" rows="5">{{ post.content }}</textarea>
+            <div>
+                <button type="submit">Save Changes</button>
+                <a href="{% url 'index' %}" class="cancel-link">Cancel</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html> 

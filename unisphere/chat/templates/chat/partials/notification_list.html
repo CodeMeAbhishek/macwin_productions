@@ -1,0 +1,21 @@
+{% for n in notifications %}
+  <div style="padding: 8px; border-bottom: 1px solid #eee;">
+    <small>
+      <strong><a href="{% url 'user_profile' n.sender.id %}" style="color: #1877f2; text-decoration: none;">{{ n.sender.username }}</a></strong>
+      {% if n.post %}
+        <a href="{% url 'index' %}#post-{{ n.post.id }}" style="color: inherit; text-decoration: none;">{{ n.message }}</a>
+      {% elif n.profile_user %}
+        <a href="{% url 'user_profile' n.profile_user.id %}" style="color: inherit; text-decoration: none;">{{ n.message }}</a>
+      {% else %}
+        {{ n.message }}
+      {% endif %}
+    </small><br>
+    <small style="color: #888;">{{ n.timestamp|timesince }} ago</small>
+    <form method="post" action="{% url 'delete_notification' n.id %}" style="display:inline; float:right;">
+      {% csrf_token %}
+      <button type="submit" style="border:none; background:none; color:#cc0000; cursor:pointer; padding:0;">✖</button>
+    </form>
+  </div>
+{% empty %}
+  <div style="padding: 10px; text-align:center; color:#888;">No notifications yet</div>
+{% endfor %} 

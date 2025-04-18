@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import AboutView, FAQView, TermsView, PrivacyView
 
 urlpatterns = [
     path('', views.index_view, name='index'),
@@ -8,13 +9,28 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
     path('send-request/<int:user_id>/', views.send_friend_request, name='send_request'),
-path('cancel-request/<int:user_id>/', views.cancel_friend_request, name='cancel_request'),
-path('accept-request/<int:request_id>/', views.accept_friend_request, name='accept_request'),
-path('friends/', views.friends_list_view, name='friends'),
-path('user/<int:user_id>/', views.user_profile_view, name='user_profile'),
-path('send-request/<int:user_id>/', views.send_friend_request, name='send_request'),
-path('accept-request/<int:request_id>/', views.accept_friend_request, name='accept_request'),
-path('chat/<int:friend_id>/', views.chat_with_friend, name='chat_with_friend'),
-path('complete-profile/<int:user_id>/', views.complete_profile_view, name='complete_profile'),
-
+    path('cancel-request/<int:user_id>/', views.cancel_friend_request, name='cancel_request'),
+    path('accept-request/<int:request_id>/', views.accept_friend_request, name='accept_request'),
+    path('friends/', views.friends_list_view, name='friends'),
+    path('find-friends/', views.find_friends_view, name='find_friends'),
+    path('user/<int:user_id>/', views.user_profile_view, name='user_profile'),
+    path('send-request/<int:user_id>/', views.send_friend_request, name='send_request'),
+    path('accept-request/<int:request_id>/', views.accept_friend_request, name='accept_request'),
+    path('chat/<int:friend_id>/', views.chat_with_friend, name='chat_with_friend'),
+    path('complete-profile/<int:user_id>/', views.complete_profile_view, name='complete_profile'),
+    path('like/<int:post_id>/', views.like_post, name='like_post'),
+    path('post/<int:post_id>/edit/', views.edit_post, name='edit_post'),
+    path('post/<int:post_id>/delete/', views.delete_post, name='delete_post'),
+    path('comment/<int:comment_id>/delete/', views.delete_comment, name='delete_comment'),
+    path('about/', views.AboutView.as_view(), name='about'),
+    path('contact/', views.contact_view, name='contact'),
+    path('faq/', views.FAQView.as_view(), name='faq'),
+    path('terms/', views.TermsView.as_view(), name='terms'),
+    path('privacy/', views.PrivacyView.as_view(), name='privacy'),
+    path('dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard_alt'),
+    path('dashboard/toggle-user/<int:user_id>/', views.toggle_block_user, name='toggle_block_user'),
+    path('dashboard/delete-post/<int:post_id>/', views.delete_post_admin, name='delete_post_admin'),
+    path('notifications/', views.notifications_view, name='notifications'),
+    path('notifications/delete/<int:notif_id>/', views.delete_notification, name='delete_notification'),
 ]

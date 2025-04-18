@@ -1,0 +1,32 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Notifications | Unisphere{% endblock %}
+
+{% block content %}
+<div class="notifications-page">
+    <h1>Notifications</h1>
+    
+    <div class="notifications-list">
+        {% include 'chat/partials/notification_list.html' %}
+    </div>
+</div>
+
+<style>
+    .notifications-page {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .notifications-page h1 {
+        margin-bottom: 2rem;
+        color: #1877f2;
+    }
+
+    .notifications-list {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %} 

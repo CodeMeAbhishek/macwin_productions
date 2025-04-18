@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Complete Your Profile | Unisphere</title>
+  <title>Complete Your Profile | MacWin</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #edf2f7;
+      margin: 0;
+      padding: 0;
+      font-family: "Tahoma", "Verdana", sans-serif;
+      background-color: #fff;
+      font-size: 11px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -14,28 +17,48 @@
     }
     .form-box {
       background: white;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      border: 1px solid #b3b3b3;
       width: 500px;
     }
-    input, select, textarea, button {
-      width: 100%;
-      margin-top: 10px;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    .form-box h2 {
+      color: #3b5998;
+      font-size: 14px;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    input, select, textarea {
+      width: 95%;
+      padding: 2px;
+      font-size: 11px;
+      border: 1px solid #bdc7d8;
+      margin-bottom: 8px;
+    }
+    label {
+      display: block;
+      color: #333;
+      margin-bottom: 3px;
+      font-weight: bold;
     }
     button {
-      background: #48bb78;
+      background-color: #3b5998;
       color: white;
-      border: none;
+      border: 1px solid #1d4088;
+      padding: 2px 6px;
       cursor: pointer;
-      margin-top: 1rem;
+      font-size: 11px;
+      margin-top: 10px;
     }
     button:hover {
-      background: #38a169;
+      background-color: #2f477a;
+    }
+    .errorlist {
+      color: #dd3c10;
+      list-style: none;
+      padding-left: 0;
+      margin: 3px 0;
+      font-size: 10px;
     }
   </style>
 </head>
@@ -45,7 +68,7 @@
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="submit">Save & Go to Login</button>
+      <button type="submit">Save & Continue</button>
     </form>
   </div>
 </body>

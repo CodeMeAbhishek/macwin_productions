@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>{{ other_user.username }}'s Profile | Unisphere</title>
+    <title>{{ other_user.username }}'s Profile | MacWin</title>
     <style>
       body {
         font-family: sans-serif;
@@ -39,16 +39,72 @@
         color: #4299e1;
         font-weight: bold;
       }
+      .friends-section {
+        margin-top: 30px;
+        text-align: left;
+      }
+      .friends-section h3 {
+        color: #1877f2;
+        margin-bottom: 15px;
+      }
+      .friends-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+      .friend-card {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+      .friend-pic {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+      }
+      .friend-info {
+        flex: 1;
+      }
+      .friend-info h4 {
+        margin: 0;
+        color: #1877f2;
+        font-size: 14px;
+      }
+      .friend-info p {
+        margin: 3px 0;
+        color: #666;
+        font-size: 12px;
+      }
+      .view-profile {
+        display: inline-block;
+        padding: 3px 8px;
+        background: #e7f3ff;
+        color: #1877f2;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 11px;
+        margin-top: 5px;
+      }
+      .no-friends {
+        color: #666;
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
     </style>
   </head>
   <body>
     <div class="profile-card">
       {% if other_user.profile.profile_pic %}
-      <img
-        src="{{ other_user.profile.profile_pic.url }}"
-        alt="Profile Picture"
-        class="profile-pic"
-      />
+        <img src="{{ other_user.profile.profile_pic.url }}" alt="Profile Picture" class="profile-pic" />
+      {% else %}
+        <img src="https://ui-avatars.com/api/?name={{ other_user.profile.full_name|urlencode }}&background=random" alt="Default Profile Picture" class="profile-pic" />
       {% endif %}
 
       <h2>{{ other_user.profile.full_name }}</h2>
@@ -82,6 +138,30 @@
         <button type="submit">Send Friend Request</button>
       </form>
       {% endif %}
+
+      <div class="friends-section">
+        <h3>Friends ({{ friends|length }})</h3>
+        {% if friends %}
+          <div class="friends-grid">
+            {% for friend in friends %}
+              <div class="friend-card">
+                {% if friend.profile.profile_pic %}
+                  <img src="{{ friend.profile.profile_pic.url }}" alt="{{ friend.username }}'s Profile Picture" class="friend-pic">
+                {% else %}
+                  <img src="/static/chat/images/default-profile.png" alt="Default Profile Picture" class="friend-pic">
+                {% endif %}
+                <div class="friend-info">
+                  <h4>{{ friend.profile.full_name }}</h4>
+                  <p>@{{ friend.username }}</p>
+                  <a href="{% url 'user_profile' friend.id %}" class="view-profile">View Profile</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="no-friends">No friends yet</p>
+        {% endif %}
+      </div>
 
       <a href="{% url 'index' %}">← Back to Home</a>
     </div>

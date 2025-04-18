@@ -2,105 +2,203 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Chat with {{ friend.username }} | Unisphere</title>
+  <title>Chat with {{ friend.username }} | MacWin</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f7fafc;
       margin: 0;
-      padding: 2rem;
+      padding: 0;
+      font-family: "Tahoma", "Verdana", sans-serif;
+      background-color: #fff;
+      font-size: 11px;
     }
-    .chat-box {
-      max-width: 700px;
-      margin: auto;
-      background: white;
-      padding: 1rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .header {
+      background-color: #3b5998;
+      padding: 2px 5px;
+      color: white;
+      border-bottom: 1px solid #1d4088;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 14px;
+      padding: 2px;
+    }
+    .header-links {
+      float: right;
+      margin-top: -20px;
+    }
+    .header-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 10px;
+      font-size: 11px;
+    }
+    .container {
+      width: 800px;
+      margin: 20px auto;
       display: flex;
-      flex-direction: column;
-      height: 80vh;
     }
-    .chat-header {
+    .sidebar {
+      width: 200px;
+      margin-right: 20px;
+    }
+    .quick-search {
+      border: 1px solid #b3b3b3;
+      padding: 8px;
+      margin-bottom: 10px;
+      background: #f7f7f7;
+    }
+    .quick-search input {
+      width: 120px;
+      padding: 2px;
+      font-size: 11px;
+      border: 1px solid #bdc7d8;
+    }
+    .quick-search button {
+      padding: 1px 6px;
+      font-size: 11px;
+      background: #3b5998;
+      color: white;
+      border: 1px solid #1d4088;
+      cursor: pointer;
+    }
+    .nav-links {
+      border: 1px solid #b3b3b3;
+      padding: 8px;
+      background: #f7f7f7;
+    }
+    .nav-links a {
+      display: block;
+      color: #3b5998;
+      text-decoration: none;
+      padding: 3px 0;
+    }
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+    .main-content {
+      flex: 1;
+    }
+    .chat-section {
+      border: 1px solid #b3b3b3;
+      margin-bottom: 20px;
+    }
+    .section-header {
+      background: #3b5998;
+      color: white;
+      padding: 4px 8px;
       font-weight: bold;
-      margin-bottom: 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+    .section-header a {
+      color: white;
+      text-decoration: none;
+      font-size: 10px;
+    }
+    .section-header a:hover {
+      text-decoration: underline;
+    }
     .messages {
-      flex-grow: 1;
+      height: 400px;
       overflow-y: auto;
-      padding-right: 5px;
+      padding: 10px;
+      background: white;
     }
     .message {
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 6px;
-      max-width: 75%;
+      margin-bottom: 8px;
+      padding: 4px 8px;
+      border-radius: 0;
+      max-width: 80%;
+      font-size: 11px;
     }
     .from-me {
-      background: #bee3f8;
-      align-self: flex-end;
+      background: #dfe3ee;
       margin-left: auto;
       text-align: right;
     }
     .from-them {
-      background: #edf2f7;
-      align-self: flex-start;
+      background: #f7f7f7;
+    }
+    .message small {
+      display: block;
+      color: #777;
+      font-size: 9px;
+      margin-top: 2px;
     }
     .chat-input {
-      margin-top: auto;
+      padding: 8px;
+      background: #f7f7f7;
+      border-top: 1px solid #b3b3b3;
       display: flex;
-      gap: 10px;
-      padding-top: 1rem;
-      border-top: 1px solid #edf2f7;
+      gap: 5px;
     }
     .chat-input input {
       flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 2px 4px;
+      font-size: 11px;
+      border: 1px solid #bdc7d8;
     }
     .chat-input button {
-      padding: 10px 20px;
-      background: #4299e1;
-      border: none;
+      padding: 2px 6px;
+      background: #3b5998;
       color: white;
-      border-radius: 6px;
+      border: 1px solid #1d4088;
+      font-size: 11px;
       cursor: pointer;
     }
     .chat-input button:hover {
-      background: #3182ce;
-    }
-    .back-link {
-      color: #4299e1;
-      text-decoration: none;
-    }
-    .back-link:hover {
-      text-decoration: underline;
+      background: #2f477a;
     }
   </style>
 </head>
 <body>
-  <div class="chat-box">
-    <div class="chat-header">
-      <span>Chat with {{ friend.profile.full_name }}</span>
-      <a href="{% url 'friends' %}" class="back-link">← Back to Friends</a>
+  <div class="header">
+    <h1>[ macwin ]</h1>
+    <div class="header-links">
+      <a href="{% url 'index' %}">home</a>
+      <a href="{% url 'profile' %}">profile</a>
+      <a href="{% url 'friends' %}">friends</a>
+      <a href="{% url 'logout' %}">logout</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="quick-search">
+        <input type="text" placeholder="Quick Search">
+        <button>go</button>
+      </div>
+      <div class="nav-links">
+        <a href="{% url 'profile' %}">My Profile</a>
+        <a href="{% url 'friends' %}">My Friends</a>
+        <a href="#">My Messages</a>
+        <a href="#">My Account</a>
+        <a href="#">My Privacy</a>
+      </div>
     </div>
 
-    <div class="messages" id="chat-log">
-        {% for msg in chat_messages %}
-        <div class="message {% if msg.sender == request.user %}from-me{% else %}from-them{% endif %}">
-          <div>{{ msg.content }}</div>
-          <small>{{ msg.timestamp|date:"H:i" }}{% if msg.sender == request.user and forloop.last and msg.is_read %} ✓ Seen{% endif %}</small>
+    <div class="main-content">
+      <div class="chat-section">
+        <div class="section-header">
+          <span>Chat with {{ friend.profile.full_name }}</span>
+          <a href="{% url 'friends' %}">← back to friends</a>
         </div>
-        {% endfor %}      
-    </div>
 
-    <div class="chat-input">
-      <input type="text" id="chat-message-input" placeholder="Type your message..." />
-      <button id="chat-message-submit">Send</button>
+        <div class="messages" id="chat-log">
+          {% for msg in chat_messages %}
+            <div class="message {% if msg.sender == request.user %}from-me{% else %}from-them{% endif %}">
+              <div>{{ msg.content }}</div>
+              <small>{{ msg.timestamp|date:"H:i" }}{% if msg.sender == request.user and forloop.last and msg.is_read %} ✓ Seen{% endif %}</small>
+            </div>
+          {% endfor %}      
+        </div>
+
+        <div class="chat-input">
+          <input type="text" id="chat-message-input" placeholder="Write a message..." />
+          <button id="chat-message-submit">Send</button>
+        </div>
+      </div>
     </div>
   </div>
 
