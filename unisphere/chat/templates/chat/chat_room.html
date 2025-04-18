@@ -38,31 +38,16 @@
       padding: 10px;
       border-radius: 6px;
       max-width: 75%;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
     }
     .from-me {
       background: #bee3f8;
       align-self: flex-end;
       margin-left: auto;
-      flex-direction: row-reverse;
+      text-align: right;
     }
     .from-them {
       background: #edf2f7;
       align-self: flex-start;
-    }
-    .message-content {
-      display: flex;
-      flex-direction: column;
-    }
-    .from-me .message-content {
-      align-items: flex-end;
-      text-align: right;
-    }
-    .from-them .message-content {
-      align-items: flex-start;
-      text-align: left;
     }
     .chat-input {
       margin-top: auto;
@@ -107,29 +92,10 @@
     <div class="messages" id="chat-log">
         {% for msg in chat_messages %}
         <div class="message {% if msg.sender == request.user %}from-me{% else %}from-them{% endif %}">
-            {% if msg.sender == request.user %}
-              <div class="message-content">
-                <p style="margin: 0;">{{ msg.content }}</p>
-                <small>{{ msg.timestamp|date:"H:i" }}{% if msg.sender == request.user and forloop.last and msg.is_read %} ✓ Seen{% endif %}</small>
-              </div>
-              {% if request.user.profile.profile_pic %}
-                <img src="{{ request.user.profile.profile_pic.url }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" alt="Profile">
-              {% else %}
-                <div style="width: 36px; height: 36px; background: #ccc; border-radius: 50%;"></div>
-              {% endif %}
-            {% else %}
-              {% if friend.profile.profile_pic %}
-                <img src="{{ friend.profile.profile_pic.url }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;" alt="Profile">
-              {% else %}
-                <div style="width: 36px; height: 36px; background: #ccc; border-radius: 50%;"></div>
-              {% endif %}
-              <div class="message-content">
-                <p style="margin: 0;">{{ msg.content }}</p>
-                <small>{{ msg.timestamp|date:"H:i" }}{% if msg.sender == request.user and forloop.last and msg.is_read %} ✓ Seen{% endif %}</small>
-              </div>
-            {% endif %}
-          </div>
-      {% endfor %}      
+          <div>{{ msg.content }}</div>
+          <small>{{ msg.timestamp|date:"H:i" }}{% if msg.sender == request.user and forloop.last and msg.is_read %} ✓ Seen{% endif %}</small>
+        </div>
+        {% endfor %}      
     </div>
 
     <div class="chat-input">
@@ -149,12 +115,45 @@
 
     chatSocket.onmessage = function(e) {
       const data = JSON.parse(e.data);
+      
+      if (data.type === 'read_receipt') {
+        const messages = document.querySelectorAll('.message');
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage && lastMessage.classList.contains('from-me')) {
+          const timeElement = lastMessage.querySelector('small');
+          if (timeElement && !timeElement.textContent.includes('Seen')) {
+            timeElement.textContent = timeElement.textContent + ' ✓ Seen';
+          }
+        }
+        return;
+      }
+
       const msgDiv = document.createElement('div');
       msgDiv.classList.add('message');
-      msgDiv.classList.add(data.sender === "{{ request.user.username }}" ? 'from-me' : 'from-them');
-      msgDiv.innerHTML = `<p>${data.message}</p><small>${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</small>`;
+      
+      const isFromMe = data.sender === senderId;
+      msgDiv.classList.add(isFromMe ? 'from-me' : 'from-them');
+
+      const messageText = document.createElement('div');
+      messageText.textContent = data.message;
+      
+      const timestamp = document.createElement('small');
+      timestamp.textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      
+      msgDiv.appendChild(messageText);
+      msgDiv.appendChild(timestamp);
+
       document.getElementById('chat-log').appendChild(msgDiv);
       document.getElementById('chat-log').scrollTop = document.getElementById('chat-log').scrollHeight;
+
+      // If message is from other user, send read receipt
+      if (!isFromMe) {
+        chatSocket.send(JSON.stringify({
+          'type': 'read_receipt',
+          'sender': senderId,
+          'receiver': receiverId
+        }));
+      }
     };
 
     chatSocket.onclose = function(e) {
@@ -173,6 +172,7 @@
       if (!message.trim()) return;
 
       chatSocket.send(JSON.stringify({
+        'type': 'chat_message',
         'message': message,
         'sender': senderId,
         'receiver': receiverId
